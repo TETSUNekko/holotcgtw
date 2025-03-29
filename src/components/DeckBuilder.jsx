@@ -17,7 +17,6 @@ const CardImage = ({ card, version, className, style, onZoom, onClick }) => {
         src={imgSrc}
         alt={card.id}
         className="w-full h-full object-contain"
-        onError={(e) => (e.currentTarget.src = `${import.meta.env.BASE_URL}default.png`)}
       />
       <button
         className="absolute top-0 left-0 p-0.5 text-white bg-black bg-opacity-50 hover:bg-opacity-80 text-xs"
