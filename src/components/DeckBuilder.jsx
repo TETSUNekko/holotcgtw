@@ -6,7 +6,9 @@ import { ZoomIn } from "lucide-react";
 import SearchBar from "./SearchBar";
 
 const CardImage = ({ card, version, className, style, onZoom, onClick }) => {
-  const imgSrc = `${card.imageFolder}${card.id}${version}`;
+  const basePath = import.meta.env.BASE_URL || "/";
+  const imgSrc = `${basePath}${card.imageFolder}${card.id}${version}`;
+
 
   return (
     <div className={`relative ${className}`} onClick={onClick} style={style}>
@@ -14,7 +16,7 @@ const CardImage = ({ card, version, className, style, onZoom, onClick }) => {
         src={imgSrc}
         alt={card.id}
         className="w-full h-full object-contain"
-        onError={(e) => (e.currentTarget.src = "/default.png")}
+        onError={(e) => (e.currentTarget.src = `${import.meta.env.BASE_URL}default.png`)}
       />
       <button
         className="absolute top-0 left-0 p-0.5 text-white bg-black bg-opacity-50 hover:bg-opacity-80 text-xs"
