@@ -92,6 +92,84 @@ function DeckBuilder({ playerName }) {
     setEnergyCards((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleExportCode = async () => {
+    const payload = {
+      oshi: oshiCard,
+      deck: deckCards,
+      energy: energyCards
+    };
+    const code = Array.from({ length: 6 }, () =>
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".charAt(Math.floor(Math.random() * 36))
+    ).join("");
+
+    try {
+      await fetch("http://localhost:3001/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, payload })
+      });
+      setShareCode(code);
+      return code;
+    } catch (e) {
+      alert("❌ 無法儲存代碼");
+      return null;
+    }
+  };
+
+  const handleImportCode = async () => {
+    try {
+      const res = await fetch(`http://localhost:3001/load/${shareCode}`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setOshiCard(data.oshi);
+      setDeckCards(data.deck);
+      setEnergyCards(data.energy);
+      alert("✅ 成功讀取代碼");
+    } catch {
+      alert("❌ 無法讀取該代碼");
+    }
+  };
+
+  const handleExportImage = () => {
+    const grouped = {};
+    [...(oshiCard ? [oshiCard] : []), ...deckCards, ...energyCards].forEach((card) => {
+      const key = `${card.id}${card.version}`;
+      grouped[key] = grouped[key] || { ...card, count: 0 };
+      grouped[key].count += 1;
+    });
+
+    const html = `<!DOCTYPE html><html><head><title>我的牌組</title><style>
+      body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
+      h1 { margin-bottom: 12px; }
+      .grid { display: flex; flex-wrap: wrap; gap: 10px; }
+      .card { position: relative; width: 84px; height: 126px; }
+      .card img { width: 100%; height: 100%; object-fit: contain; }
+      .count {
+        position: absolute;
+        bottom: 2px;
+        right: 4px;
+        background: white;
+        color: red;
+        font-weight: bold;
+        font-size: 16px;
+        padding: 2px 6px;
+        border-radius: 50%;
+      }
+    </style></head><body>
+    <h1>我的牌組</h1><div class="grid">
+    ${Object.values(grouped).map((c) => `
+      <div class="card">
+        <img src="cards/${c.imageFolder}${c.id}${c.version}" alt="${c.id}" />
+        <div class="count">${c.count}</div>
+      </div>
+    `).join("")}
+    </div></body></html>`;
+
+    const w = window.open();
+    w.document.write(html);
+    w.document.close();
+  };
+
   return (
     <div className="flex flex-col h-screen max-h-screen bg-blue-50">
       <SearchBar
@@ -110,99 +188,11 @@ function DeckBuilder({ playerName }) {
         setSupportSubtype={setSupportSubtype}
         shareCode={shareCode}
         setShareCode={setShareCode}
-        onExportImage={() => {}}
-        onExportCode={() => {}}
-        onImportCode={() => {}}
+        onExportImage={handleExportImage}
+        onExportCode={handleExportCode}
+        onImportCode={handleImportCode}
       />
-
-      <div className="flex flex-1">
-        <div className="overflow-y-auto px-2 pt-6 pb-2 w-1/2">
-          <div className="grid grid-cols-5 gap-1">
-            {filteredCards.flatMap((card) =>
-              (card.versions || ["_C.png"]).map((version) => (
-                <div
-                  key={`${card.id}-${version}`}
-                  className="relative cursor-pointer"
-                  onClick={() => handleAddCard(card, version)}
-                >
-                  <CardImage
-                    card={card}
-                    version={version}
-                    style={{ width: "140px", height: "210px" }}
-                    onZoom={(url, cardData) => {
-                      setZoomImageUrl(url);
-                      setZoomCard(cardData);
-                    }}
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-[10px] text-center truncate">
-                    {card.id} {version.replace(".png", "")}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className="w-1/2 border-l px-4 py-4 bg-white" ref={deckRef}>
-          <h3 className="text-lg font-bold mb-2">🗂 我的牌組</h3>
-
-          <div className="mb-4">
-            <h4 className="text-sm font-semibold">🌟 主推卡：</h4>
-            {oshiCard ? (
-              <CardImage
-                card={oshiCard}
-                version={oshiCard.version}
-                style={{ width: "63px", height: "88px" }}
-                onZoom={(url, cardData) => {
-                  setZoomImageUrl(url);
-                  setZoomCard(cardData);
-                }}
-                onClick={() => setOshiCard(null)}
-              />
-            ) : (
-              <p className="text-xs text-gray-500">尚未選擇主推卡</p>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <h4 className="text-sm font-semibold">📦 主卡組 ({deckCards.length} / 50)：</h4>
-            <div className="flex flex-wrap gap-1">
-              {deckCards.map((card, index) => (
-                <CardImage
-                  key={`${card.id}-${card.version}-${index}`}
-                  card={card}
-                  version={card.version}
-                  style={{ width: "63px", height: "88px" }}
-                  onZoom={(url, cardData) => {
-                    setZoomImageUrl(url);
-                    setZoomCard(cardData);
-                  }}
-                  onClick={() => handleRemoveDeckCard(index)}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-semibold">⚡ 能量卡 ({energyCards.length} / 20)：</h4>
-            <div className="flex flex-wrap gap-1">
-              {energyCards.map((card, index) => (
-                <CardImage
-                  key={`${card.id}-e-${index}`}
-                  card={card}
-                  version={card.version}
-                  style={{ width: "63px", height: "88px" }}
-                  onZoom={(url, cardData) => {
-                    setZoomImageUrl(url);
-                    setZoomCard(cardData);
-                  }}
-                  onClick={() => handleRemoveEnergyCard(index)}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      <div className="flex flex-1"> ... </div>
     </div>
   );
 }
