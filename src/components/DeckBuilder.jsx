@@ -30,6 +30,43 @@ const CardImage = ({ card, version, className, style, onZoom, onClick }) => {
   );
 };
 
-// 以下內容不變...
+function DeckBuilder({ playerName }) {
+  const [zoomImageUrl, setZoomImageUrl] = useState("");
+  const [zoomCard, setZoomCard] = useState(null);
+  const [oshiCard, setOshiCard] = useState(null);
+  const [deckCards, setDeckCards] = useState([]);
+  const [energyCards, setEnergyCards] = useState([]);
+  const [shareCode, setShareCode] = useState("");
+
+  const deckRef = useRef();
+  const allCards = [...cardList, ...energyCardList];
+
+  // 你可以根據需要繼續添加 filter, add/remove card 等邏輯
+
+  return (
+    <div className="flex flex-col h-screen max-h-screen bg-blue-50">
+      <h1 className="text-center py-4 font-bold text-xl">Hello DeckBuilder</h1>
+      <div className="flex-1 overflow-auto">
+        {/* 渲染卡片測試區域 */}
+        <div className="grid grid-cols-5 gap-2 p-4">
+          {allCards.slice(0, 5).map((card) =>
+            (card.versions || ["_C.png"]).map((version) => (
+              <CardImage
+                key={`${card.id}-${version}`}
+                card={card}
+                version={version}
+                style={{ width: "140px", height: "210px" }}
+                onZoom={(url, cardData) => {
+                  setZoomImageUrl(url);
+                  setZoomCard(cardData);
+                }}
+              />
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default DeckBuilder;
