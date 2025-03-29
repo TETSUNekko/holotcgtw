@@ -7,7 +7,7 @@ import SearchBar from "./SearchBar";
 
 const CardImage = ({ card, version, className, style, onZoom, onClick }) => {
   const basePath = import.meta.env.BASE_URL || "/";
-  const imgSrc = `${basePath}${card.imageFolder}${card.id}${version}`;
+  const imgSrc = `${basePath}cards/${card.imageFolder}${card.id}${version}`;
   console.log("🧩 image src =", imgSrc);
 
 
