@@ -2,6 +2,7 @@
 import React, { useState, useRef } from "react";
 import cardList from "../cardList_hBP01.json";
 import cardListBP02 from "../cardList_hBP02.json";
+import cardListBP03 from "../cardList_hBP03.json";
 import energyCardList from "../cardList_hY.json";
 import { ZoomIn } from "lucide-react";
 import SearchBar from "./SearchBar";
@@ -47,7 +48,7 @@ function DeckBuilder({ playerName }) {
   const [filterVersion, setFilterVersion] = useState("全部版本");
 
   const deckRef = useRef();
-  const allCards = [...cardList, ...cardListBP02, ...energyCardList];
+  const allCards = [...cardList, ...cardListBP02, ...cardListBP03, ...energyCardList];
 
   const filteredCards = allCards.filter((card) => {
     const isEnergyCard = card.imageFolder.includes("energy") || card.type === "Energy";
@@ -64,7 +65,7 @@ function DeckBuilder({ playerName }) {
           keyword.toLowerCase().includes(searchTerm.toLowerCase())
         ));
 
-    const colorMatch = filterColor === "全部顏色" || card.color === filterColor;
+    const colorMatch = filterColor === "全部顏色" || card.color.includes(filterColor);
     const gradeMatch = filterGrade === "全部階級" || card.grade === filterGrade;
     const seriesMatch = filterSeries === "全部彈數" || card.series === filterSeries;
     const subtypeMatch =
@@ -198,10 +199,14 @@ function DeckBuilder({ playerName }) {
         onExportCode={handleExportCode}
         onImportCode={handleImportCode}
         />
-
+        
+        {/* 左側卡片清單容器 */}
         <div className="flex flex-1">
-          <div className="overflow-y-auto px-2 pt-6 pb-2 w-1/2 max-h-[calc(100vh-120px)]">
-            <div className="grid grid-cols-5 gap-1">
+
+          <div className="w-1/2 h-full">
+            <div className="overflow-y-auto px-2 pt-6 pb-2" style={{ maxHeight: "calc(100vh - 160px)" }}>
+              <div className="grid grid-cols-5 gap-1">
+          
               {filteredCards.flatMap((card) =>
                 (card.versions || ["_C.png"])
                   .filter((version) => {
@@ -229,6 +234,7 @@ function DeckBuilder({ playerName }) {
                     </div>
                   ))
               )}
+              </div>
             </div>
           </div>
   
