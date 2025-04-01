@@ -44,6 +44,7 @@ function DeckBuilder({ playerName }) {
   const [filterGrade, setFilterGrade] = useState("全部階級");
   const [filterSeries, setFilterSeries] = useState("全部彈數");
   const [supportSubtype, setSupportSubtype] = useState("全部");
+  const [filterVersion, setFilterVersion] = useState("全部版本");
 
   const deckRef = useRef();
   const allCards = [...cardList, ...cardListBP02, ...energyCardList];
@@ -74,6 +75,8 @@ function DeckBuilder({ playerName }) {
   });
 
   const handleAddCard = (card, version) => {
+    if (filterVersion !== "全部版本" && version.replace(".png", "") !== filterVersion) return;
+
     if (card.type === "Oshi") {
       setOshiCard((prev) =>
         prev && prev.id === card.id && prev.version === version ? null : { ...card, version }
@@ -189,101 +192,109 @@ function DeckBuilder({ playerName }) {
         setSupportSubtype={setSupportSubtype}
         shareCode={shareCode}
         setShareCode={setShareCode}
+        filterVersion={filterVersion}
+        setFilterVersion={setFilterVersion}
         onExportImage={handleExportImage}
         onExportCode={handleExportCode}
         onImportCode={handleImportCode}
-      />
+        />
 
-      <div className="flex flex-1">
-        <div className="overflow-y-auto px-2 pt-6 pb-2 w-1/2">
-          <div className="grid grid-cols-5 gap-1">
-            {filteredCards.flatMap((card) =>
-              (card.versions || ["_C.png"]).map((version) => (
-                <div
-                  key={`${card.id}-${version}`}
-                  className="relative cursor-pointer"
-                  onClick={() => handleAddCard(card, version)}
-                >
+        <div className="flex flex-1">
+          <div className="overflow-y-auto px-2 pt-6 pb-2 w-1/2 max-h-[calc(100vh-120px)]">
+            <div className="grid grid-cols-5 gap-1">
+              {filteredCards.flatMap((card) =>
+                (card.versions || ["_C.png"])
+                  .filter((version) => {
+                    if (filterVersion === "全部版本") return true;
+                    return version.replace(".png", "") === filterVersion;
+                  })
+                  .map((version) => (
+                    <div
+                      key={`${card.id}-${version}`}
+                      className="relative cursor-pointer"
+                      onClick={() => handleAddCard(card, version)}
+                    >
+                      <CardImage
+                        card={card}
+                        version={version}
+                        style={{ width: "140px", height: "210px" }}
+                        onZoom={(url, cardData) => {
+                          setZoomImageUrl(url);
+                          setZoomCard(cardData);
+                        }}
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-[10px] text-center truncate">
+                        {card.id} {version.replace(".png", "")}
+                      </div>
+                    </div>
+                  ))
+              )}
+            </div>
+          </div>
+  
+          <div className="w-1/2 border-l px-4 py-4 bg-white" ref={deckRef}>
+            <h3 className="text-lg font-bold mb-2">🗂 我的牌組</h3>
+  
+            <div className="mb-4">
+              <h4 className="text-sm font-semibold">🌟 主推卡：</h4>
+              {oshiCard ? (
+                <CardImage
+                  card={oshiCard}
+                  version={oshiCard.version}
+                  style={{ width: "63px", height: "88px" }}
+                  onZoom={(url, cardData) => {
+                    setZoomImageUrl(url);
+                    setZoomCard(cardData);
+                  }}
+                  onClick={() => setOshiCard(null)}
+                />
+              ) : (
+                <p className="text-xs text-gray-500">尚未選擇主推卡</p>
+              )}
+            </div>
+  
+            <div className="mb-4">
+              <h4 className="text-sm font-semibold">📦 主卡組 ({deckCards.length} / 50)：</h4>
+              <div className="flex flex-wrap gap-1">
+                {deckCards.map((card, index) => (
                   <CardImage
+                    key={`${card.id}-${card.version}-${index}`}
                     card={card}
-                    version={version}
-                    style={{ width: "140px", height: "210px" }}
+                    version={card.version}
+                    style={{ width: "63px", height: "88px" }}
                     onZoom={(url, cardData) => {
                       setZoomImageUrl(url);
                       setZoomCard(cardData);
                     }}
+                    onClick={() => handleRemoveDeckCard(index)}
                   />
-                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-[10px] text-center truncate">
-                    {card.id} {version.replace(".png", "")}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className="w-1/2 border-l px-4 py-4 bg-white" ref={deckRef}>
-          <h3 className="text-lg font-bold mb-2">🗂 我的牌組</h3>
-
-          <div className="mb-4">
-            <h4 className="text-sm font-semibold">🌟 主推卡：</h4>
-            {oshiCard ? (
-              <CardImage
-                card={oshiCard}
-                version={oshiCard.version}
-                style={{ width: "63px", height: "88px" }}
-                onZoom={(url, cardData) => {
-                  setZoomImageUrl(url);
-                  setZoomCard(cardData);
-                }}
-                onClick={() => setOshiCard(null)}
-              />
-            ) : (
-              <p className="text-xs text-gray-500">尚未選擇主推卡</p>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <h4 className="text-sm font-semibold">📦 主卡組 ({deckCards.length} / 50)：</h4>
-            <div className="flex flex-wrap gap-1">
-              {deckCards.map((card, index) => (
-                <CardImage
-                  key={`${card.id}-${card.version}-${index}`}
-                  card={card}
-                  version={card.version}
-                  style={{ width: "63px", height: "88px" }}
-                  onZoom={(url, cardData) => {
-                    setZoomImageUrl(url);
-                    setZoomCard(cardData);
-                  }}
-                  onClick={() => handleRemoveDeckCard(index)}
-                />
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-semibold">⚡ 能量卡 ({energyCards.length} / 20)：</h4>
-            <div className="flex flex-wrap gap-1">
-              {energyCards.map((card, index) => (
-                <CardImage
-                  key={`${card.id}-e-${index}`}
-                  card={card}
-                  version={card.version}
-                  style={{ width: "63px", height: "88px" }}
-                  onZoom={(url, cardData) => {
-                    setZoomImageUrl(url);
-                    setZoomCard(cardData);
-                  }}
-                  onClick={() => handleRemoveEnergyCard(index)}
-                />
-              ))}
+  
+            <div>
+              <h4 className="text-sm font-semibold">⚡ 能量卡 ({energyCards.length} / 20)：</h4>
+              <div className="flex flex-wrap gap-1">
+                {energyCards.map((card, index) => (
+                  <CardImage
+                    key={`${card.id}-e-${index}`}
+                    card={card}
+                    version={card.version}
+                    style={{ width: "63px", height: "88px" }}
+                    onZoom={(url, cardData) => {
+                      setZoomImageUrl(url);
+                      setZoomCard(cardData);
+                    }}
+                    onClick={() => handleRemoveEnergyCard(index)}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-export default DeckBuilder;
+    );
+  }
+  
+  export default DeckBuilder;
+  

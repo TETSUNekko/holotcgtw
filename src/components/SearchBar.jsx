@@ -15,6 +15,8 @@ function SearchBar({
   setFilterSeries,
   supportSubtype,
   setSupportSubtype,
+  filterVersion,
+  setFilterVersion,
   shareCode,
   setShareCode,
   onExportImage,
@@ -91,6 +93,27 @@ function SearchBar({
           <option value="tool">Tool</option>
           <option value="mascot">Mascot</option>
           <option value="fan">Fan</option>
+        </select>
+
+        <select
+          className="border rounded px-2 py-1"
+          value={filterVersion}
+          onChange={(e) => setFilterVersion(e.target.value)}
+        >
+          <option value="全部版本">全部版本</option>
+          <option value="_RR">RR</option>
+          <option value="_R">R</option>
+          <option value="_U">U</option>
+          <option value="_C">C</option>
+          <option value="_OSR">OSR</option>
+          <option value="_OC">OC</option>
+          <option value="_SEC">SEC</option>
+          <option value="_OUR">OUR</option>
+          <option value="_UR">UR</option>
+          <option value="_SY">SY</option>
+          <option value="_SR">SR</option>
+          <option value="_S">S</option>
+          <option value="_P">P</option>
         </select>
       </div>
 
