@@ -76,6 +76,8 @@ function SearchBar({
         <select className="border rounded px-2 py-1" value={filterSeries} onChange={(e) => setFilterSeries(e.target.value)}>
           <option value="全部彈數">全部彈數</option>
           <option value="hBP01">ブースターパック「ブルーミングレディアンス」</option>
+          <option value="hBP02">ブースターパック「クインテットスペクトラム」</option>
+          <option value="hBP03">ブースターパック「エリートスパーク」</option>
         </select>
 
         <select
