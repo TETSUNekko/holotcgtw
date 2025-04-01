@@ -1,6 +1,7 @@
 // DeckBuilder.jsx
 import React, { useState, useRef } from "react";
 import cardList from "../cardList_hBP01.json";
+import cardListBP02 from "../cardList_hBP02.json";
 import energyCardList from "../cardList_hY.json";
 import { ZoomIn } from "lucide-react";
 import SearchBar from "./SearchBar";
@@ -45,7 +46,7 @@ function DeckBuilder({ playerName }) {
   const [supportSubtype, setSupportSubtype] = useState("全部");
 
   const deckRef = useRef();
-  const allCards = [...cardList, ...energyCardList];
+  const allCards = [...cardList, ...cardListBP02, ...energyCardList];
 
   const filteredCards = allCards.filter((card) => {
     const isEnergyCard = card.imageFolder.includes("energy") || card.type === "Energy";
