@@ -16,6 +16,7 @@ const CardImage = ({ card, version, className, style, onZoom, onClick }) => {
       <img
         src={imgSrc}
         alt={card.id}
+        loading="lazy"
         className="w-full h-full object-contain"
       />
       <button
