@@ -77,7 +77,7 @@
     "versions": ["_SEC.png", "_OSR.png", "_OUR.png"]
   },
   {
-    "id": "hBP03-08",
+    "id": "hBP03-008",
     "type": "Oshi",
     "name": "アユンダ・リス",
     "imageFolder": "hBP03/",
@@ -910,7 +910,7 @@
     "grade": "buzz",
     "series": "hBP03",
     "searchKeywords": ["音乃瀨奏", "音乃瀨奏", "Otonose Kanade"],
-    "versions": ["R.png", "_SR.png"]
+    "versions": ["_R.png", "_SR.png"]
   },
   {
     "id": "hBP03-084",

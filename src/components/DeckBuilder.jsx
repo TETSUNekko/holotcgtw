@@ -9,7 +9,7 @@ import SearchBar from "./SearchBar";
 
 const CardImage = ({ card, version, className, style, onZoom, onClick }) => {
   const basePath = import.meta.env.BASE_URL || "/";
-  const imgSrc = `${basePath}cards/${card.imageFolder}${card.id}${version}`;
+  const imgSrc = `${basePath}webpcards/${card.imageFolder}${card.id}${version.replace(".png", ".webp")}`;
 
   return (
     <div className={`relative ${className}`} onClick={onClick} style={style}>
@@ -35,7 +35,7 @@ const CardImage = ({ card, version, className, style, onZoom, onClick }) => {
 function DeckBuilder({ playerName }) {
   const [zoomImageUrl, setZoomImageUrl] = useState("");
   const [zoomCard, setZoomCard] = useState(null);
-  const [oshiCard, setOshiCard] = useState(null);
+  const [oshiCards, setOshiCards] = useState([]);
   const [deckCards, setDeckCards] = useState([]);
   const [energyCards, setEnergyCards] = useState([]);
   const [shareCode, setShareCode] = useState("");
@@ -80,10 +80,8 @@ function DeckBuilder({ playerName }) {
     if (filterVersion !== "全部版本" && version.replace(".png", "") !== filterVersion) return;
 
     if (card.type === "Oshi") {
-      setOshiCard((prev) =>
-        prev && prev.id === card.id && prev.version === version ? null : { ...card, version }
-      );
-    } else if (card.type === "Energy") {
+      setOshiCards((prev) => [...prev, { ...card, version }]);
+    }else if (card.type === "Energy") {
       setEnergyCards((prev) => [...prev, { ...card, version }]);
     } else {
       setDeckCards((prev) => [...prev, { ...card, version }]);
@@ -100,7 +98,7 @@ function DeckBuilder({ playerName }) {
 
   const handleExportCode = async () => {
     const payload = {
-      oshi: oshiCard,
+      oshi: oshiCards,
       deck: deckCards,
       energy: energyCards
     };
@@ -127,7 +125,7 @@ function DeckBuilder({ playerName }) {
       const res = await fetch(`http://localhost:3001/load/${shareCode}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
-      setOshiCard(data.oshi);
+      setOshiCards(data.oshi || []);
       setDeckCards(data.deck);
       setEnergyCards(data.energy);
       alert("✅ 成功讀取代碼");
@@ -138,7 +136,7 @@ function DeckBuilder({ playerName }) {
 
   const handleExportImage = () => {
     const grouped = {};
-    [...(oshiCard ? [oshiCard] : []), ...deckCards, ...energyCards].forEach((card) => {
+    [...oshiCards, ...deckCards, ...energyCards].forEach((card) => {
       const key = `${card.id}${card.version}`;
       grouped[key] = grouped[key] || { ...card, count: 0 };
       grouped[key].count += 1;
@@ -148,18 +146,19 @@ function DeckBuilder({ playerName }) {
       body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
       h1 { margin-bottom: 12px; }
       .grid { display: flex; flex-wrap: wrap; gap: 10px; }
-      .card { position: relative; width: 84px; height: 126px; }
+      .card { position: relative; width: 140px; height: 210px; }
       .card img { width: 100%; height: 100%; object-fit: contain; }
       .count {
         position: absolute;
         bottom: 2px;
         right: 4px;
-        background: white;
-        color: red;
+        background: #000000aa;  /* 深灰背景，可以改成你想要的色碼 */
+        color: #fff;            /* 白色字體 */
         font-weight: bold;
-        font-size: 16px;
-        padding: 2px 6px;
-        border-radius: 50%;
+        font-size: 18px;        /* 可依需求調整大小 */
+        padding: 4px 8px;       /* 方形感更明顯 */
+        border-radius: 4px;     /* 稍微有點圓角感，也可以設為 0 完全方形 */
+        text-shadow
       }
     </style></head><body>
     <h1>我的牌組</h1><div class="grid">
@@ -175,6 +174,31 @@ function DeckBuilder({ playerName }) {
     w.document.write(html);
     w.document.close();
   };
+
+  const renderZoomCard = () => {
+    if (!zoomImageUrl || !zoomCard) return null;
+  
+    return (
+      <div
+        className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50"
+        onClick={() => setZoomCard(null)}
+      >
+        <div className="relative" onClick={(e) => e.stopPropagation()}>
+          <img
+            src={zoomImageUrl}
+            alt={zoomCard.id}
+            className="w-[240px] h-[360px] object-contain border shadow-lg"
+          />
+          <button
+            className="absolute top-1 right-1 bg-white text-black px-2 py-1 rounded"
+            onClick={() => setZoomCard(null)}
+          >
+            關閉
+          </button>
+        </div>
+      </div>
+    );
+  };  
 
   return (
     <div className="flex flex-col h-screen max-h-screen bg-blue-50">
@@ -243,21 +267,28 @@ function DeckBuilder({ playerName }) {
             <h3 className="text-lg font-bold mb-2">🗂 我的牌組</h3>
   
             <div className="mb-4">
-              <h4 className="text-sm font-semibold">🌟 主推卡：</h4>
-              {oshiCard ? (
-                <CardImage
-                  card={oshiCard}
-                  version={oshiCard.version}
-                  style={{ width: "63px", height: "88px" }}
-                  onZoom={(url, cardData) => {
-                    setZoomImageUrl(url);
-                    setZoomCard(cardData);
-                  }}
-                  onClick={() => setOshiCard(null)}
-                />
-              ) : (
-                <p className="text-xs text-gray-500">尚未選擇主推卡</p>
-              )}
+              <h4 className="text-sm font-semibold">🌟 主推卡（{oshiCards.length} / 1）：</h4>
+                {oshiCards.length > 0 ? (
+                  <div className="flex flex-wrap gap-1">
+                    {oshiCards.map((card, index) => (
+                      <CardImage
+                        key={`${card.id}-oshi-${index}`}
+                        card={card}
+                        version={card.version}
+                        style={{ width: "63px", height: "88px" }}
+                        onZoom={(url, cardData) => {
+                          setZoomImageUrl(url);
+                          setZoomCard(cardData);
+                        }}
+                        onClick={() =>
+                          setOshiCards((prev) => prev.filter((_, i) => i !== index))
+                        }
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-500">尚未選擇主推卡</p>
+                )}
             </div>
   
             <div className="mb-4">
@@ -299,9 +330,10 @@ function DeckBuilder({ playerName }) {
             </div>
           </div>
         </div>
+        {renderZoomCard()}
       </div>
     );
   }
-  
+
   export default DeckBuilder;
   
