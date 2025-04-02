@@ -107,7 +107,7 @@ function DeckBuilder({ playerName }) {
     ).join("");
 
     try {
-      await fetch("http://localhost:3001/save", {
+      await fetch("https://deck-api-server.onrender.com/save", { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code, payload })
@@ -122,7 +122,7 @@ function DeckBuilder({ playerName }) {
 
   const handleImportCode = async () => {
     try {
-      const res = await fetch(`http://localhost:3001/load/${shareCode}`);
+      const res = await fetch(`https://deck-api-server.onrender.com/load/${shareCode}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setOshiCards(data.oshi || []);
