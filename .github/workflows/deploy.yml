@@ -21,7 +21,7 @@ jobs:
         run: npm cache clean --force
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Fix vite permission
         run: chmod +x ./node_modules/.bin/vite
