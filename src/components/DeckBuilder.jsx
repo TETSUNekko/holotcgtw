@@ -158,7 +158,6 @@ function DeckBuilder({ playerName }) {
         font-size: 18px;        /* 可依需求調整大小 */
         padding: 4px 8px;       /* 方形感更明顯 */
         border-radius: 4px;     /* 稍微有點圓角感，也可以設為 0 完全方形 */
-        text-shadow
       }
     </style></head><body>
     <h1>我的牌組</h1><div class="grid">
