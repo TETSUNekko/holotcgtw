@@ -35,7 +35,7 @@ function SearchBar({
   };
 
   return (
-    <div className="sticky top-0 z-10 bg-amber-100 p-3 border-b border-yellow-300 shadow-sm">
+    <div className="sticky top-0 z-10 bg-amber-50 p-3 border-b border-yellow-300 shadow-sm">
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="text-lg font-bold">👤 玩家：{playerName}</h2>
 
@@ -77,9 +77,9 @@ function SearchBar({
 
         <select className="border rounded px-2 py-1" value={filterSeries} onChange={(e) => setFilterSeries(e.target.value)}>
           <option value="全部彈數">全部彈數</option>
-          <option value="hBP01">ブースターパック「ブルーミングレディアンス」</option>
-          <option value="hBP02">ブースターパック「クインテットスペクトラム」</option>
-          <option value="hBP03">ブースターパック「エリートスパーク」</option>
+          <option value="hBP01">hBP01ブースターパック「ブルーミングレディアンス」</option>
+          <option value="hBP02">hBP02ブースターパック「クインテットスペクトラム」</option>
+          <option value="hBP03">hBP03ブースターパック「エリートスパーク」</option>
         </select>
 
         <select
@@ -143,6 +143,14 @@ function SearchBar({
         >
           📥 讀取代碼
         </button>
+        <a
+          href="https://mail.google.com/mail/?view=cm&fs=1&to=holotcgtw.feedback@gmail.com&su=HoloTCG意見回饋&body=請在此填寫你的意見～"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+        >
+          📮 意見回饋
+        </a>
       </div>
     </div>
   );

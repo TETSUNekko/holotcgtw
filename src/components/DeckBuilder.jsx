@@ -6,6 +6,7 @@ import cardListBP03 from "../cardList_hBP03.json";
 import energyCardList from "../cardList_hY.json";
 import { ZoomIn } from "lucide-react";
 import SearchBar from "./SearchBar";
+import html2canvas from "html2canvas";
 
 const CardImage = ({ card, version, className, style, onZoom, onClick }) => {
   const basePath = import.meta.env.BASE_URL || "/";
@@ -141,63 +142,77 @@ function DeckBuilder({ playerName }) {
       grouped[key] = grouped[key] || { ...card, count: 0 };
       grouped[key].count += 1;
     });
-
-    const html = `<!DOCTYPE html><html><head><title>我的牌組</title><style>
-      body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
-      h1 { margin-bottom: 12px; }
-      .grid { display: flex; flex-wrap: wrap; gap: 10px; }
-      .card { position: relative; width: 140px; height: 210px; }
-      .card img { width: 100%; height: 100%; object-fit: contain; }
-      .count {
-        position: absolute;
-        bottom: 2px;
-        right: 4px;
-        background: #000000aa;  /* 深灰背景，可以改成你想要的色碼 */
-        color: #fff;            /* 白色字體 */
-        font-weight: bold;
-        font-size: 18px;        /* 可依需求調整大小 */
-        padding: 4px 8px;       /* 方形感更明顯 */
-        border-radius: 4px;     /* 稍微有點圓角感，也可以設為 0 完全方形 */
-      }
-    </style></head><body>
-    <h1>我的牌組</h1><div class="grid">
-    ${Object.values(grouped).map((c) => `
-      <div class="card">
-        <img src="cards/${c.imageFolder}${c.id}${c.version}" alt="${c.id}" />
-        <div class="count">${c.count}</div>
+  
+    const html = `<!DOCTYPE html><html><head><title>我的牌組</title>
+      <style>
+        body { font-family: sans-serif; padding: 20px; background:rgb(206, 240, 239); }
+        h1 { margin-bottom: 12px; }
+        .grid { display: flex; flex-wrap: wrap; gap: 10px; cursor: pointer; }
+        .card { position: relative; width: 140px; height: 210px; }
+        .card img { width: 100%; height: 100%; object-fit: contain; }
+        .count {
+          position: absolute;
+          bottom: 2px;
+          right: 4px;
+          background: #000000aa;
+          color: #fff;
+          font-weight: bold;
+          font-size: 18px;
+          padding: 4px 8px;
+          border-radius: 4px;
+        }
+      </style>
+    </head><body>
+      <h1>我的牌組(點圖片可下載)</h1>
+      <div class="grid" id="deckArea" title="點擊下載圖片">
+        ${Object.values(grouped).map((c) => `
+          <div class="card">
+            <img src="cards/${c.imageFolder}${c.id}${c.version}" alt="${c.id}" />
+            <div class="count">${c.count}</div>
+          </div>
+        `).join("")}
       </div>
-    `).join("")}
-    </div></body></html>`;
-
+  
+      <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+      <script>
+        const deckArea = document.getElementById('deckArea');
+        deckArea.addEventListener('click', () => {
+          html2canvas(deckArea, { scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'my-deck.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          });
+        });
+      </script>
+    </body></html>`;
+  
     const w = window.open();
     w.document.write(html);
     w.document.close();
   };
+  
 
   const renderZoomCard = () => {
     if (!zoomImageUrl || !zoomCard) return null;
   
     return (
       <div
-        className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50"
-        onClick={() => setZoomCard(null)}
+        className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center"
+        onClick={() => {
+          setZoomImageUrl("");
+          setZoomCard(null);
+        }}
       >
-        <div className="relative" onClick={(e) => e.stopPropagation()}>
-          <img
-            src={zoomImageUrl}
-            alt={zoomCard.id}
-            className="w-[240px] h-[360px] object-contain border shadow-lg"
-          />
-          <button
-            className="absolute top-1 right-1 bg-white text-black px-2 py-1 rounded"
-            onClick={() => setZoomCard(null)}
-          >
-            關閉
-          </button>
-        </div>
+        <img
+          src={zoomImageUrl}
+          alt={zoomCard.id}
+          style={{ width: "420px", height: "630px" }}
+          className="shadow-xl"
+        />
       </div>
     );
-  };  
+  };
 
   return (
     <div className="flex flex-col h-screen max-h-screen bg-blue-50">
@@ -262,7 +277,7 @@ function DeckBuilder({ playerName }) {
             </div>
           </div>
   
-          <div className="w-1/2 border-l px-4 py-4 bg-white" ref={deckRef}>
+          <div className="w-1/2 border-l px-4 py-4 bg-zinc-100" ref={deckRef}>
             <h3 className="text-lg font-bold mb-2">🗂 我的牌組</h3>
   
             <div className="mb-4">

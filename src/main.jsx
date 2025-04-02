@@ -1,4 +1,5 @@
 import './output.css';
+import './tailwind.css';
 import App from './App.jsx';
 
 import { StrictMode } from 'react';
