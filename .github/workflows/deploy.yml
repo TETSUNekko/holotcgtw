@@ -19,6 +19,8 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+    
+      - run: npm install vite
 
       - name: Build
         run: npm run build
